@@ -1,7 +1,7 @@
 package com.ykcoding.authenticationapp.network
 
-import com.ykcoding.authenticationapp.helper.SessionHandler
-import com.ykcoding.authenticationapp.helper.isLoggedIn
+import com.ykcoding.authenticationapp.helper.SessionManager
+import com.ykcoding.authenticationapp.helper.ext.isLoggedIn
 import com.ykcoding.authenticationapp.network.service.SessionRepo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,19 +15,18 @@ import java.net.HttpURLConnection
 
 class AuthorizationHeaderInterceptor(private val sessionRepo: Lazy<SessionRepo>): Interceptor, KoinComponent {
 
-    //private val sessionManager by lazy { SessionManager }
-    private val sessionHandler: SessionHandler by inject<SessionHandler>()
+    private val sessionManager: SessionManager by inject<SessionManager>()
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        return when(sessionHandler.isLoggedIn()) {
+        return when(sessionManager.isLoggedIn()) {
             true -> {
-                var response = chain.proceed(buildAuthorizedRequest(chain.request(), sessionHandler.getSessionAccessToken()))
+                var response = chain.proceed(buildAuthorizedRequest(chain.request(), sessionManager.getSessionAccessToken()))
 
                 if (response.code == HttpURLConnection.HTTP_UNAUTHORIZED) {
                     response.close()
-                    sendRefreshToken(sessionHandler.getSessionRefreshToken())
+                    sendRefreshToken(sessionManager.getSessionRefreshToken())
 
-                    response = chain.proceed(buildAuthorizedRequest(chain.request(), sessionHandler.getSessionAccessToken()))
+                    response = chain.proceed(buildAuthorizedRequest(chain.request(), sessionManager.getSessionAccessToken()))
                 }
 
 

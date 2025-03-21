@@ -1,6 +1,5 @@
 package com.ykcoding.authenticationapp.network.service
 
-import com.ykcoding.authenticationapp.helper.SessionHandler
 import com.ykcoding.authenticationapp.helper.SessionManager
 import com.ykcoding.authenticationapp.network.NetworkResponse
 import com.ykcoding.authenticationapp.network.model.session.SessionModel
@@ -14,14 +13,13 @@ class SessionRepoImpl(
     private val service: SessionService
 ): SessionRepo, KoinComponent {
 
-    //private val sessionManager by lazy { SessionManager }
-    private val sessionHandler: SessionHandler by inject<SessionHandler>()
+    private val sessionManager: SessionManager by inject<SessionManager>()
 
     override suspend fun create(username: String, password: String): NetworkResponse<SessionModel> {
 
         return try {
             val response = service.createSession(username = username, password = password)
-            sessionHandler.saveSession(response)
+            sessionManager.saveSession(response)
             NetworkResponse.Success(response)
         } catch (e: HttpException) {
             NetworkResponse.Error.Api(code = e.code(), message = e.message())
@@ -37,7 +35,7 @@ class SessionRepoImpl(
 
         return try {
             val response = service.updateSession(refreshToken = refreshToken)
-            sessionHandler.saveSession(response)
+            sessionManager.saveSession(response)
             NetworkResponse.Success(response)
 
         } catch (e: HttpException) {
