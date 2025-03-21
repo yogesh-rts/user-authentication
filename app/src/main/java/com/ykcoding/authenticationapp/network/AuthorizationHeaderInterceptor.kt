@@ -1,7 +1,6 @@
 package com.ykcoding.authenticationapp.network
 
 import com.ykcoding.authenticationapp.helper.SessionHandler
-import com.ykcoding.authenticationapp.helper.SessionManager
 import com.ykcoding.authenticationapp.helper.isLoggedIn
 import com.ykcoding.authenticationapp.network.service.SessionRepo
 import kotlinx.coroutines.CoroutineScope
