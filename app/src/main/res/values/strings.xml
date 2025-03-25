@@ -3,4 +3,6 @@
 
     <string name="authentication_loginScreen_title">Login</string>
     <string name="authentication_loginScreen_loginBtnLabel">Login</string>
+    <string name="authentication_loginScreen_welcomeTitleText">Welcome,</string>
+    <string name="authentication_loginScreen_continueWithLabel">Or continue with</string>
 </resources>
