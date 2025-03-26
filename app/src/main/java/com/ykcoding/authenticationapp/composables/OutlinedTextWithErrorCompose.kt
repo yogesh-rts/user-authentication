@@ -6,7 +6,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,13 +14,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.ykcoding.authenticationapp.R
+import com.ykcoding.authenticationapp.ui.theme.ErrorTextColor
 
 @Composable
 fun OutlinedTextFieldWithError(
@@ -34,7 +34,7 @@ fun OutlinedTextFieldWithError(
     errorText: String? = null,
 ) {
     val isPasswordField: Boolean = keyboardOptions?.keyboardType == KeyboardType.Password
-    val hasFocus by remember { mutableStateOf(false) }
+    var hasFocus by remember { mutableStateOf(false) }
     var displayErrors by remember { mutableStateOf(false) }
     var isPasswordVisible by remember { mutableStateOf(false) }
 
@@ -77,15 +77,18 @@ fun OutlinedTextFieldWithError(
             if (displayErrors) {
                 Text(
                     text = errorText ?: "",
-                    color = Color.Red
+                    color = ErrorTextColor,
+                    fontSize = 12.sp
                 )
             }
         },
+        isError = text.isEmpty() && displayErrors,
         modifier = Modifier
             .onFocusChanged {
                 if (!it.hasFocus && hasFocus) {
                     displayErrors = true
                 }
+                hasFocus = it.hasFocus
             }
     )
 
