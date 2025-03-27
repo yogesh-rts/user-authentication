@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import com.ykcoding.authenticationapp.R
 import com.ykcoding.authenticationapp.composables.OutlinedTextFieldWithError
+import com.ykcoding.authenticationapp.network.NetworkResponse
 import com.ykcoding.authenticationapp.ui.theme.ErrorTextColor
 import com.ykcoding.authenticationapp.ui.theme.NativeAuthenticationAppTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -82,11 +84,32 @@ class LoginActivity : ComponentActivity() {
 
     @Composable
     fun Layout(padding: PaddingValues) {
-        val ctx = LocalContext.current
         val username by viewModel.usernameTextState.collectAsState()
         val password by viewModel.passwordTextState.collectAsState()
         val userErrorType by viewModel.usernameErrorType.collectAsState()
         val passwordErrorType by viewModel.passwordErrorState.collectAsState()
+        val response by viewModel.response.collectAsState()
+
+        response.let {
+            it?.getIfContentHasBeenHandled()?.let { response ->
+                when(response) {
+                    is NetworkResponse.Success -> {
+                        Toast.makeText(
+                            this@LoginActivity,
+                            "Successfully logged-in",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    is NetworkResponse.Error -> {
+                        Toast.makeText(
+                            this@LoginActivity,
+                            response.handleErrorResponse(),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+        }
 
         Box(modifier = Modifier
             .fillMaxSize()
@@ -162,13 +185,7 @@ class LoginActivity : ComponentActivity() {
                 Spacer(modifier = Modifier.height(4.dp))
                 Button(
                     onClick = {
-                        viewModel.login(username, password) {
-                            Toast.makeText(
-                                ctx,
-                                "successfully logged-in",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
+                        viewModel.login(username, password)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -213,6 +230,8 @@ class LoginActivity : ComponentActivity() {
         }
     }
 }
+
+
 
 
 

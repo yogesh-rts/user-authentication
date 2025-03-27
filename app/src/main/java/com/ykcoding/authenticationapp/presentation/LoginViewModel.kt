@@ -1,12 +1,15 @@
 package com.ykcoding.authenticationapp.presentation
 
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ykcoding.authenticationapp.helper.LiveDataEvent
 import com.ykcoding.authenticationapp.network.NetworkResponse
 import com.ykcoding.authenticationapp.network.service.SessionRepo
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -24,8 +27,8 @@ class LoginViewModel(private val sessionRepo: SessionRepo) : ViewModel()  {
     private val _passwordErrorState = MutableStateFlow(ErrorType.NONE)
     val passwordErrorState = _passwordErrorState.asStateFlow()
 
-    private val _errorResponse: MutableStateFlow<LiveDataEvent<NetworkResponse.Error>?> = MutableStateFlow(null)
-    val errorResponse = _errorResponse.asStateFlow()
+    private val _response: MutableStateFlow<LiveDataEvent<NetworkResponse<*>>?> = MutableStateFlow(null)
+    val response = _response.asStateFlow()
 
 
     fun setUsername(username: String) {
@@ -46,18 +49,18 @@ class LoginViewModel(private val sessionRepo: SessionRepo) : ViewModel()  {
         _passwordErrorState.value = if (_passwordTextState.value.isEmpty()) ErrorType.EMPTY else ErrorType.NONE
     }
 
-    fun login(userName: String, password: String, onSuccess: () -> Unit) {
+    fun login(userName: String, password: String) {
 
         viewModelScope.launch {
 
             when(val response = sessionRepo.create(userName, password)) {
                 is NetworkResponse.Success -> {
                     Log.d("LoginViewModel", "Login successful")
-                    onSuccess.invoke()
+                    _response.value = LiveDataEvent(response)
                 }
                 is NetworkResponse.Error -> {
                     Log.d("LoginViewModel", "Login Failed")
-                    _errorResponse.value = LiveDataEvent(response)
+                    _response.value = LiveDataEvent(response)
                 }
             }
         }
